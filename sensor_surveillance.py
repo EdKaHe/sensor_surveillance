@@ -29,13 +29,13 @@ f_photo = figure(tools=[PanTool(), WheelZoomTool(), ResetTool(), SaveTool()],out
 hover=HoverTool(tooltips=[('Date', '@date')])
 f_photo.add_tools(hover)
 f_photo.toolbar.logo = None
-f_photo.output_backend = 'svg'
+#f_photo.output_backend = 'svg'
 
 f_laser = figure(tools=[PanTool(), WheelZoomTool(), ResetTool(), SaveTool()],output_backend='webgl')
 hover=HoverTool(tooltips=[('Date', '@date')])
 f_laser.add_tools(hover)
 f_laser.toolbar.logo = None
-f_laser.output_backend = 'svg'
+#f_laser.output_backend = 'svg'
 
 #initialize port and read the photocurrent
 def read_csv(filename=filename_all_data):
@@ -54,9 +54,9 @@ source = ColumnDataSource(source_df)
     
 #create glyphs
 #f_photo.circle(x='time', y='photo_current', color='firebrick', line_color=None, size=8, fill_alpha=0.4, source=source)
-f_photo.line(x='time', y='photo_current', line_color='gray', line_width=5, line_alpha=0.5, source=source)
+f_photo.circle(x='time', y='photo_current', size=10, line_color='gray', fill_color='gray', line_alpha=1, fill_alpha=0.3, source=source)
 
-f_laser.line(x='time', y='laser_current', line_color='firebrick', line_width=5, line_alpha=0.5, source=source)
+f_laser.circle(x='time', y='laser_current', size=10, line_color='firebrick', fill_color='firebrick', line_alpha=1, fill_alpha=0.3, source=source)
 
 #Style the plot area
 f_photo.plot_width = 900
