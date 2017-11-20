@@ -21,7 +21,8 @@ import pandas as pd
 start_time = time()
 
 #connect to server and generate csv file
-filename_csv = r'data/sc_data.csv'
+filename_all_data=r'/opt/webapps/sensor_surveillance/data/sc_all_data.csv' #this file contains all data
+filename_new_data=r'/opt/webapps/sensor_surveillance/data/sc_new_data.csv' #this file contains newest data for streaming it
 
 #create figure
 f_photo = figure(tools=[PanTool(), WheelZoomTool(), ResetTool(), SaveTool()],output_backend='webgl')
@@ -37,19 +38,18 @@ f_laser.toolbar.logo = None
 f_laser.output_backend = 'svg'
 
 #initialize port and read the photocurrent
-def read_csv(filename=filename_csv):
+def read_csv(filename=filename_all_data):
     data_csv = pd.read_csv(filename, sep=';')
     return data_csv
    
 #create periodic function
 def update():
-    source_df = read_csv() #pandas dataframe
-    source_df = source_df.tail(1)
+    source_df = read_csv(filename_new_data) #pandas dataframe
 #    new_data=dict(time=list(df['time'].values), photo_current=list(df['photo_current'].values), laser_current=list(df['laser_current'].values), date=list(df['date'].values))
     source.stream(ColumnDataSource.from_df(source_df))#,rollover=600) #how many glyphs/circles are kept in plot
 
 #create columndatasource
-source_df = read_csv()
+source_df = read_csv(filename_all_data)
 source = ColumnDataSource(source_df)
     
 #create glyphs
