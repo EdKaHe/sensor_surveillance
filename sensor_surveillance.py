@@ -7,7 +7,7 @@ Created on Sun Nov 12 16:59:59 2017
 
 from bokeh.io import curdoc
 from bokeh.models import PanTool, ResetTool, WheelZoomTool, SaveTool, HoverTool, ColumnDataSource
-from bokeh.models.widgets import Button
+from bokeh.models.widgets import Button, Dropdown
 from bokeh.models.callbacks import CustomJS
 from bokeh.layouts import layout
 from bokeh.plotting import figure
@@ -29,13 +29,11 @@ f_photo = figure(tools=[PanTool(), WheelZoomTool(), ResetTool(), SaveTool()],out
 hover=HoverTool(tooltips=[('Date', '@date')])
 f_photo.add_tools(hover)
 f_photo.toolbar.logo = None
-#f_photo.output_backend = 'svg'
 
 f_laser = figure(tools=[PanTool(), WheelZoomTool(), ResetTool(), SaveTool()],output_backend='webgl')
 hover=HoverTool(tooltips=[('Date', '@date')])
 f_laser.add_tools(hover)
 f_laser.toolbar.logo = None
-#f_laser.output_backend = 'svg'
 
 #initialize port and read the photocurrent
 def read_csv(filename=filename_all_data):
@@ -45,18 +43,32 @@ def read_csv(filename=filename_all_data):
 #create periodic function
 def update():
     source_df = read_csv(filename_new_data) #pandas dataframe
+    if dropdown.value=='laser_current':
+        source_df['selected_data']= source_df['laser_current']
+    elif dropdown.value=='temperature':
+        source_df['selected_data']= source_df['temperature']
 #    new_data=dict(time=list(df['time'].values), photo_current=list(df['photo_current'].values), laser_current=list(df['laser_current'].values), date=list(df['date'].values))
     source.stream(ColumnDataSource.from_df(source_df))#,rollover=600) #how many glyphs/circles are kept in plot
 
+def update_plot(attr, old, new): 
+    #change yaxis label and reset data
+    if dropdown.value=='laser_current':
+        f_laser.yaxis.axis_label='Laser Current'
+        source.data['selected_data']= source.data['laser_current'][:-1]
+    elif dropdown.value=='temperature':
+        f_laser.yaxis.axis_label=u'Temp. in (\u2103)'
+        source.data['selected_data']= source.data['temperature'][:-1]  
+    
 #create columndatasource
 source_df = read_csv(filename_all_data)
+source_df['selected_data']=source_df['temperature'][:]
 source = ColumnDataSource(source_df)
     
 #create glyphs
 #f_photo.circle(x='time', y='photo_current', color='firebrick', line_color=None, size=8, fill_alpha=0.4, source=source)
 f_photo.circle(x='time', y='photo_current', size=10, line_color='gray', fill_color='gray', line_alpha=1, fill_alpha=0.3, source=source)
 
-f_laser.circle(x='time', y='laser_current', size=10, line_color='firebrick', fill_color='firebrick', line_alpha=1, fill_alpha=0.3, source=source)
+f_laser.circle(x='time', y='selected_data', size=10, line_color='firebrick', fill_color='firebrick', line_alpha=1, fill_alpha=0.3, source=source)
 
 #Style the plot area
 f_photo.plot_width = 900
@@ -86,7 +98,7 @@ f_photo.axis.major_label_text_font_style = 'normal'
 f_laser.axis.minor_tick_line_color='black'
 f_laser.axis.minor_tick_in=-6
 f_laser.xaxis.axis_label='Time in (s)'
-f_laser.yaxis.axis_label='Laser Current'
+f_laser.yaxis.axis_label=u'Temp. in (\u2103)'
 f_laser.axis.axis_label_text_color=(0.7,0.7,0.7)
 f_laser.axis.major_label_text_color=(0.7,0.7,0.7)
 f_laser.axis.axis_label_text_font = 'helvetica'
@@ -116,7 +128,7 @@ f_laser.grid.grid_line_dash=[5,3]
 button = Button(label='Export data', button_type='danger')
 js_download = """
 var csv = source.get('data');
-var filetext = 'time;photo_current;laser_current;date\\n';
+var filetext = 'time;photo_current;laser_current;temperature;date\\n';
 for (i=0; i < csv['date'].length; i++) {
     var currRow = [csv['time'][i].toString(),
                    csv['photo_current'][i].toString(),
@@ -146,7 +158,12 @@ if (link.download !== undefined) { // feature detection
 }"""
 button.callback = CustomJS(args=dict(source=source), code=js_download)
 
+#Create dropdown button for auxilary data
+menu = [("Temperature", "temperature"), ("Laser current", "laser_current")]
+dropdown = Dropdown(label="Select data", button_type="danger", menu=menu, value='temperature')
+dropdown.on_change('value',update_plot)
+
 #add figure to curdoc and configure callback
-lay_out=layout([[f_photo],[f_laser],[button]])
+lay_out=layout([[f_photo],[f_laser],[button, dropdown]])
 curdoc().add_root(lay_out)
 curdoc().add_periodic_callback(update,2000) #updates each 2000ms
