@@ -30,10 +30,10 @@ hover=HoverTool(tooltips=[('Date', '@date')])
 f_photo.add_tools(hover)
 f_photo.toolbar.logo = None
 
-f_laser = figure(tools=[PanTool(), WheelZoomTool(), ResetTool(), SaveTool()],output_backend='webgl')
+f_aux = figure(tools=[PanTool(), WheelZoomTool(), ResetTool(), SaveTool()],output_backend='webgl')
 hover=HoverTool(tooltips=[('Date', '@date')])
-f_laser.add_tools(hover)
-f_laser.toolbar.logo = None
+f_aux.add_tools(hover)
+f_aux.toolbar.logo = None
 
 #initialize port and read the photocurrent
 def read_csv(filename=filename_all_data):
@@ -53,10 +53,10 @@ def update():
 def update_plot(attr, old, new): 
     #change yaxis label and reset data
     if dropdown.value=='laser_current':
-        f_laser.yaxis.axis_label='Laser Current'
+        f_aux.yaxis.axis_label='Laser Current'
         source.data['selected_data']= source.data['laser_current'][:-1]
     elif dropdown.value=='temperature':
-        f_laser.yaxis.axis_label=u'Temp. in (\u2103)'
+        f_aux.yaxis.axis_label=u'Temp. in (\u2103)'
         source.data['selected_data']= source.data['temperature'][:-1]  
     
 #create columndatasource
@@ -66,9 +66,9 @@ source = ColumnDataSource(source_df)
     
 #create glyphs
 #f_photo.circle(x='time', y='photo_current', color='firebrick', line_color=None, size=8, fill_alpha=0.4, source=source)
-f_photo.circle(x='time', y='photo_current', size=10, line_color='gray', fill_color='gray', line_alpha=1, fill_alpha=0.3, source=source)
+f_photo.circle(x='time', y='photo_current', size=10, line_color='gray', fill_color='gray', line_alpha=0.8, fill_alpha=0.3, source=source)
 
-f_laser.circle(x='time', y='selected_data', size=10, line_color='firebrick', fill_color='firebrick', line_alpha=1, fill_alpha=0.3, source=source)
+f_aux.circle(x='time', y='selected_data', size=10, line_color='firebrick', fill_color='firebrick', line_alpha=0.8, fill_alpha=0.3, source=source)
 
 #Style the plot area
 f_photo.plot_width = 900
@@ -76,10 +76,10 @@ f_photo.plot_height = 400
 f_photo.background_fill_color=None
 f_photo.border_fill_color=None
 
-f_laser.plot_width = 900
-f_laser.plot_height = 200
-f_laser.background_fill_color=None
-f_laser.border_fill_color=None
+f_aux.plot_width = 900
+f_aux.plot_height = 200
+f_aux.background_fill_color=None
+f_aux.border_fill_color=None
 
 
 #Style the axes
@@ -95,18 +95,18 @@ f_photo.axis.major_label_text_font = 'helvetica'
 f_photo.axis.major_label_text_font_size = '10pt'
 f_photo.axis.major_label_text_font_style = 'normal'
 
-f_laser.axis.minor_tick_line_color='black'
-f_laser.axis.minor_tick_in=-6
-f_laser.xaxis.axis_label='Time in (s)'
-f_laser.yaxis.axis_label=u'Temp. in (\u2103)'
-f_laser.axis.axis_label_text_color=(0.7,0.7,0.7)
-f_laser.axis.major_label_text_color=(0.7,0.7,0.7)
-f_laser.axis.axis_label_text_font = 'helvetica'
-f_laser.axis.axis_label_text_font_size = '16pt'
-f_laser.axis.axis_label_text_font_style = 'normal'
-f_laser.axis.major_label_text_font = 'helvetica'
-f_laser.axis.major_label_text_font_size = '10pt'
-f_laser.axis.major_label_text_font_style = 'normal'
+f_aux.axis.minor_tick_line_color='black'
+f_aux.axis.minor_tick_in=-6
+f_aux.xaxis.axis_label='Time in (s)'
+f_aux.yaxis.axis_label=u'Temp. in (\u2103)'
+f_aux.axis.axis_label_text_color=(0.7,0.7,0.7)
+f_aux.axis.major_label_text_color=(0.7,0.7,0.7)
+f_aux.axis.axis_label_text_font = 'helvetica'
+f_aux.axis.axis_label_text_font_size = '16pt'
+f_aux.axis.axis_label_text_font_style = 'normal'
+f_aux.axis.major_label_text_font = 'helvetica'
+f_aux.axis.major_label_text_font_size = '10pt'
+f_aux.axis.major_label_text_font_style = 'normal'
 
 #Style the title
 f_photo.title.text='Hydrogen Control'
@@ -120,9 +120,9 @@ f_photo.grid.grid_line_color=(1,1,1)
 f_photo.grid.grid_line_alpha=0.3
 f_photo.grid.grid_line_dash=[5,3]
 
-f_laser.grid.grid_line_color=(1,1,1)
-f_laser.grid.grid_line_alpha=0.3
-f_laser.grid.grid_line_dash=[5,3]
+f_aux.grid.grid_line_color=(1,1,1)
+f_aux.grid.grid_line_alpha=0.3
+f_aux.grid.grid_line_dash=[5,3]
 
 #add widgets (dropdown button) to save data as csv. CustomJS required to download data in browser
 button = Button(label='Export data', button_type='danger')
@@ -164,6 +164,6 @@ dropdown = Dropdown(label="Select data", button_type="danger", menu=menu, value=
 dropdown.on_change('value',update_plot)
 
 #add figure to curdoc and configure callback
-lay_out=layout([[f_photo],[f_laser],[button, dropdown]])
+lay_out=layout([[f_photo], [f_aux], [button, dropdown]])
 curdoc().add_root(lay_out)
 curdoc().add_periodic_callback(update,2000) #updates each 2000ms
