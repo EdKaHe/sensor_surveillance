@@ -164,6 +164,6 @@ dropdown = Dropdown(label="Select data", button_type="danger", menu=menu, value=
 dropdown.on_change('value',update_plot)
 
 #add figure to curdoc and configure callback
-lay_out=layout([[f_photo], [f_aux], [button, dropdown]])
+lay_out=layout([[f_photo], [f_aux], [dropdown, button]])
 curdoc().add_root(lay_out)
 curdoc().add_periodic_callback(update,2000) #updates each 2000ms
